@@ -2,10 +2,11 @@
 
 int main(void)
 {
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int window = 800;
+    int posX= 20, posY= 100;
+    int width= 760, height= 680;
 
-    InitWindow(screenWidth, screenHeight, "afrisnake");
+    InitWindow(window, window, "afrisnake");
 
     SetTargetFPS(60);
 
@@ -16,7 +17,8 @@ int main(void)
 
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground(GREEN);
+        DrawRectangleLines(posX, posY, width, height, BLACK);
 
         // Draw
 
