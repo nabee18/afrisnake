@@ -1,0 +1,45 @@
+001 – Build the Field
+Draw a rectangular grid-based play area.
+
+Add boundaries (walls around the edges).
+
+002 – Develop the Snake
+Create the snake body .
+
+Implement movement controls (up, down, left, right).
+
+Decide whether the snake can wrap around (i think not).
+
+003 – Add Food
+Generate food randomly on the grid.
+
+Detect when the snake eats food.
+
+Remove eaten food and spawn new food.
+
+004 – Snake Growth
+Increase snake length after eating food.
+
+005 – Collision Detection
+Detect collision with walls.
+
+Detect collision with snake’s own body.
+
+Trigger game over when collision occurs.
+
+006 – Scoring System
+Award points for each food eaten.
+
+Display score on screen.
+
+007 – Game Timer / Speed
+Add increasing speed as score rises.
+
+End game when timer runs out (maybe not include).
+
+008 – Modes & Enhancements (unlikely to add)
+Add difficulty levels (easy, medium, hard).
+
+Introduce obstacles or power-ups.
+
+Replace simple blocks with more realistic snake graphics.

@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug afrisnake",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/afrisnake.exe",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/raylib/w64devkit/bin/gdb.exe",
+            "preLaunchTask": "Build",
+            "externalConsole": true
+        }
+    ]
+}
