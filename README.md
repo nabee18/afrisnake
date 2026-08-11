@@ -1,4 +1,4 @@
-# HABAH BABAH
+# AFRISNAKE
 
-A simple c implimented user interactive head ball game
+This project consists of a classic snake interactive game, applying the basic concepts of c implimented with ralib
 
