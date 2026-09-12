@@ -26,6 +26,7 @@ int main(void)
     // Snake body positions (simple fixed-length snake for now)
     Vector2 snake[100];
     int length =10;  // snake length
+    int inc=10;  // increase in length after eating
     for (int i=0; i<length; i++){
         snake[i]=(Vector2){window/2-i*snakeSize, window/2};
     }
@@ -96,6 +97,10 @@ int main(void)
 
        if(CheckCollisionCircleRec((Vector2){centerX, centerY}, 10.0f, (Rectangle){snake[0].x, snake[0].y, snakeSize, snakeSize}))
        {
+            length+=inc;
+            for (int i=inc; i>0; i--){
+                snake[length-i]=snake[length-i-1];
+            }
             centerX = posX + (rand() % (width/snakeSize)) * snakeSize;
             centerY = posY + (rand() % (height/snakeSize)) * snakeSize;
        }
