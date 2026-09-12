@@ -1,17 +1,24 @@
 #include "raylib.h"
+#include<stdlib.h>
+#include<time.h>
 
 int main(void)
 {
-    const int window = 800;
+    int window = 800;
     int posX= 20, posY= 100;
     int width= 760, height= 680;
+    
     // walls
     int left=20, top=100;
     int right=20, bottom= 20;
-    
-    //snake
+    //====snake
     int snakeSize=20;
     int speed=5;
+    int centerX, centerY;
+    srand(time(0));
+    centerX=posX + (rand() % (width/snakeSize))*snakeSize;
+    centerY=posY + (rand() % (height/snakeSize))*snakeSize;
+
 
     bool verPossible=true;
     bool horPossible=false;
@@ -58,7 +65,8 @@ int main(void)
             dy=-speed;
         }
 
-        // Move snake: shift body
+        //=======Move snake: shift body=====//
+        //==================================//
         for (int i=length-1; i>0; i--)
         {
             snake[i]=snake[i-1];
@@ -66,11 +74,31 @@ int main(void)
         snake[0].x+=dx;
         snake[0].y+=dy;
 
-        // Keep snake inside window
+        //===================================//
+        //======Keep snake inside window=====//
+        //===================================//
         if (snake[0].x<left) snake[0].x=left;
         if (snake[0].x>window-snakeSize-right) snake[0].x=window-snakeSize-right;
         if (snake[0].y<top) snake[0].y=top;
         if (snake[0].y>window-snakeSize-bottom) snake[0].y=window-snakeSize-bottom;
+
+
+        // Check collision of head with food
+        /*if ((int)snake[0].x == centerX && (int)snake[0].y == centerY) {
+            centerX = posX + (rand() % (width/snakeSize)) * snakeSize;
+            centerY = posY + (rand() % (height/snakeSize)) * snakeSize;
+        }*//*
+        if(CheckCollisionPointCircle(snake[0], (Vector2){centerX, centerY}, 10.0f))
+        {
+            centerX = posX + (rand() % (width/snakeSize)) * snakeSize;
+            centerY = posY + (rand() % (height/snakeSize)) * snakeSize;
+        }*/
+
+       if(CheckCollisionCircleRec((Vector2){centerX, centerY}, 10.0f, (Rectangle){snake[0].x, snake[0].y, snakeSize, snakeSize}))
+       {
+            centerX = posX + (rand() % (width/snakeSize)) * snakeSize;
+            centerY = posY + (rand() % (height/snakeSize)) * snakeSize;
+       }
 
         BeginDrawing();
         ClearBackground(DARKGREEN);
@@ -80,11 +108,9 @@ int main(void)
             DrawRectangleV(snake[i], (Vector2){snakeSize, snakeSize}, WHITE);
         }
 
-        BeginDrawing();
-
-        ClearBackground(DARKGREEN);
         DrawRectangleLines(posX, posY, width, height, BLACK);
-
+        DrawCircle(centerX, centerY, 10, WHITE);
+        
         // Draw
 
         EndDrawing();
