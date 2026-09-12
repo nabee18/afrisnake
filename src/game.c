@@ -34,6 +34,10 @@ static bool gameStarted;
 
 static int score;
 
+double elapsed, startTime;
+
+int minutes, seconds;
+
 void InitGame(){
     window = 800;
     posX= 20;
@@ -87,6 +91,7 @@ void UpdateGame(){
 
     if(!gameStarted)
         return;
+        
     // Change direction with keys
     if (IsKeyPressed(KEY_RIGHT) && horPossible){
         verPossible=true;
@@ -155,9 +160,13 @@ void UpdateGame(){
         if(CheckCollisionRecs(snake[0], snake[i]))
         {
             gameOver=true;
-            //printf("Hello");
         }
     }
+    
+    elapsed = GetTime() - startTime;
+
+    minutes= (int)((elapsed) / 60);
+    seconds= (int)(elapsed) % 60;
 
 }
 
@@ -173,23 +182,27 @@ void DrawGame(){
 
     if(gameOver)
     {
-        //if(GetTime()-ExitTime >1.0)
-        //    gameOver=false;
 
         DrawText("Game Over", window/5, window/5, 100, WHITE);
         DrawText("Press R to Restart", window/5, window/3, 50, WHITE);
         
         if(IsKeyPressed(KEY_R)){
+            startTime=GetTime();
             InitGame();
         }
     }
 
     if(!gameStarted){
         DrawText("Press Enter to start", window/4, window/5, 30, WHITE);
-        if(IsKeyPressed(KEY_ENTER))
+
+        if(IsKeyPressed(KEY_ENTER)){
+            startTime=GetTime();
             gameStarted=true;
+        }
     }
     DrawText(TextFormat("Score %d", score), 10, 20, 50, WHITE);
+
+    DrawText(TextFormat("Time %02d:%02d",minutes, seconds), 10, 80, 40, WHITE);
 
 }
 
