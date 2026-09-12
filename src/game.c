@@ -30,7 +30,9 @@ static int dx, dy;
 
 static bool gameOver;
 
-static double ExitTime;
+static bool gameStarted;
+
+static int score;
 
 void InitGame(){
     window = 800;
@@ -73,9 +75,18 @@ void InitGame(){
 
     gameOver=false;
 
+    gameStarted=false;
+
+    score=0;
+
 }
 
 void UpdateGame(){
+    if(gameOver)
+        return;
+
+    if(!gameStarted)
+        return;
     // Change direction with keys
     if (IsKeyPressed(KEY_RIGHT) && horPossible){
         verPossible=true;
@@ -122,19 +133,19 @@ void UpdateGame(){
     //Colision with fruit
     if(CheckCollisionCircleRec((Vector2){centerX, centerY}, 10.0f, snake[0]))
     {
-         length+=inc;
-         for (int i=inc; i>0; i--){
-             snake[length-i]=snake[length-i-1];
-         }
-         centerX = posX + (rand() % (width/snakeSize)) * snakeSize;
-         centerY = posY + (rand() % (height/snakeSize)) * snakeSize;
+        score++;
+        length+=inc;
+        for (int i=inc; i>0; i--){
+            snake[length-i]=snake[length-i-1];
+        }
+        centerX = posX + (rand() % (width/snakeSize)) * snakeSize;
+        centerY = posY + (rand() % (height/snakeSize)) * snakeSize;
     }
 
     //collision with wall
     if(((snake[0].x >=window -snakeSize -left && dx>0) || (snake[0].x <=left && dx<0)) ||
        ((snake[0].y >=window -snakeSize - left && dy>0) || (snake[0].y <= top && dy<0))
     ){
-        ExitTime=GetTime();
         gameOver=true;
     }
 
@@ -143,7 +154,6 @@ void UpdateGame(){
     {
         if(CheckCollisionRecs(snake[0], snake[i]))
         {
-            ExitTime=GetTime();
             gameOver=true;
             //printf("Hello");
         }
@@ -163,11 +173,23 @@ void DrawGame(){
 
     if(gameOver)
     {
-        if(GetTime()-ExitTime >1.0)
-            gameOver=false;
+        //if(GetTime()-ExitTime >1.0)
+        //    gameOver=false;
 
         DrawText("Game Over", window/5, window/5, 100, WHITE);
+        DrawText("Press R to Restart", window/5, window/3, 50, WHITE);
+        
+        if(IsKeyPressed(KEY_R)){
+            InitGame();
+        }
     }
+
+    if(!gameStarted){
+        DrawText("Press Enter to start", window/4, window/5, 30, WHITE);
+        if(IsKeyPressed(KEY_ENTER))
+            gameStarted=true;
+    }
+    DrawText(TextFormat("Score %d", score), 10, 20, 50, WHITE);
 
 }
 
