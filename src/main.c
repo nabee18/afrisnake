@@ -1,7 +1,9 @@
 #include "raylib.h"
 #include "game.h"
+#include<stdlib.h>
+#include<time.h>
 
-int main(void)
+int main()
 {
     int window = 800;
 
@@ -10,6 +12,8 @@ int main(void)
     InitGame();
 
     SetTargetFPS(60);
+    
+    srand(time(0));
 
     while (!WindowShouldClose())
     {

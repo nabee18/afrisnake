@@ -1,87 +1,73 @@
 #include "raylib.h"
 #include "game.h"
-#include<stdlib.h>
-#include<time.h>
+#include "collision.h"
+#include "fruit.h"
+#include "game_check.h"
+#include "obstacles.h"
 
 static int window;
-static int posX, posY;
-static int width, height;
+
+// Field rectangle
+static Rectangle field;
+
+static Texture2D fieldTexure;
 
 // walls
-static int left, top;
-static int right, bottom;
+static int left;
+static int top, bottom;
+
+// Fruit
+static Vector2 center;
+static float radius;
 
 //====snake
-static int snakeSize;
-static int speed;
-static int centerX, centerY;
-static bool verPossible;
-static bool horPossible;
-
-// Snake body positions (simple fixed-length snake for now) 
-//static Vector2 snake[100000];
-static Rectangle snake[10000];
-static int length;  // snake length
-static int inc;  // increase in length after eating
-
-// ===============================//
-// ====== Movement direction =====//
-static int dx, dy;
+static Snake snake;
+static int bodyStart;
+static Texture2D snakeHead;
 
 static bool gameOver;
-
 static bool gameStarted;
 
 static int score;
 
 double elapsed, startTime;
-
 int minutes, seconds;
+
+// Obstacles
+static Obstacle obstacle;
 
 void InitGame(){
     window = 800;
-    posX= 20;
-    posY= 100;
-    width= 760;
-    height= 680;
     
+    field.x=20;
+    field.y=100;
+    field.width=760;
+    field.height=680;
+
+    fieldTexure=LoadTexture("assets/textures/background.png");
+
     // walls
     left=20;
     top=100;
-    right=20;
     bottom= 20;
-    //====snake
-    snakeSize=20;
-    length =10;  // snake length
-    speed=5;
-    centerX, centerY;
-    srand(time(0));
-    centerX=posX + (rand() % (width/snakeSize))*snakeSize;
-    centerY=posY + (rand() % (height/snakeSize))*snakeSize;
+    
+    radius=10.0f;
 
-
-    verPossible=true;
-    horPossible=false;
-
-    inc=10;  // increase in length after eating
-    for (int i=0; i<length; i++){
-        //snake[i]=(Vector2){window/2-i*snakeSize, window/2};
-        snake[i].x= window/2 - i*snakeSize;
-        snake[i].y= window/2;
-        snake[i].width= snakeSize;
-        snake[i].height= snakeSize;
-    }
-
-    // ===============================//
-    // ====== Movement direction =====//
-    dx=speed;
-    dy=0;
+    //=====Snake======//
+    InitSnake(&snake, window);
+    bodyStart=7;
+    snakeHead= LoadTexture("assets/textures/snake.png");
 
     gameOver=false;
-
     gameStarted=false;
 
     score=0;
+
+    obstacle.num = 0;
+
+    // Check Validity of fruit position
+    //CheckValidity(snake, &center, field, radius, obstacle);
+    //CheckValidity(snake, &center, field, radius);
 
 }
 
@@ -91,121 +77,87 @@ void UpdateGame(){
 
     if(!gameStarted)
         return;
-        
+
     // Change direction with keys
-    if (IsKeyPressed(KEY_RIGHT) && horPossible){
-        verPossible=true;
-        horPossible=false;
-        dx=speed;
-        dy=0;
-    }
-    if (IsKeyPressed(KEY_LEFT) && horPossible){
-        verPossible=true;
-        horPossible=false;
-        dx=-speed;
-        dy=0; 
-    }
-    if (IsKeyPressed(KEY_DOWN) && verPossible)  { 
-        verPossible=false;
-        horPossible=true;
-        dx= 0; 
-        dy=speed; 
-    }
-    if (IsKeyPressed(KEY_UP) && verPossible)  { 
-        verPossible=false;
-        horPossible=true;
-        dx=0;
-        dy=-speed;
-    }
+    UpdateSnake(&snake, KEY_LEFT, KEY_RIGHT,
+                KEY_UP, KEY_DOWN);
 
     //=======Move snake: shift body=====//
-    //==================================//
-    for (int i=length-1; i>0; i--)
-    {
-        snake[i]=snake[i-1];
-    }
-    snake[0].x+=dx;
-    snake[0].y+=dy;
+    MoveSnake(&snake);
 
-    //====================================//
     //====== Keep snake inside window =====//
-    //=====================================//
-    if (snake[0].x<left) snake[0].x=left;
-    if (snake[0].x>window-snakeSize-right) snake[0].x=window-snakeSize-right;
-    if (snake[0].y<top) snake[0].y=top;
-    if (snake[0].y>window-snakeSize-bottom) snake[0].y=window-snakeSize-bottom;
-
+    // No need as gameover
+    
     //Colision with fruit
-    if(CheckCollisionCircleRec((Vector2){centerX, centerY}, 10.0f, snake[0]))
-    {
-        score++;
-        length+=inc;
-        for (int i=inc; i>0; i--){
-            snake[length-i]=snake[length-i-1];
-        }
-        centerX = posX + (rand() % (width/snakeSize)) * snakeSize;
-        centerY = posY + (rand() % (height/snakeSize)) * snakeSize;
-    }
+    SnakeFruit(&snake, &center, radius, &score, field, obstacle);
 
-    //collision with wall
-    if(((snake[0].x >=window -snakeSize -left && dx>0) || (snake[0].x <=left && dx<0)) ||
-       ((snake[0].y >=window -snakeSize - left && dy>0) || (snake[0].y <= top && dy<0))
-    ){
-        gameOver=true;
-    }
+    //collision with wall, pass address for consistency, tho not needed
+    SnakeWall(&snake, left, top, bottom, window, &gameOver);
 
     //Detect collision with body//Detect collission with body
-    for(int i=7; i<length; i++)
-    {
-        if(CheckCollisionRecs(snake[0], snake[i]))
-        {
-            gameOver=true;
-        }
-    }
-    
+    SnakeBody(&snake, &gameOver, bodyStart);
+
+    SnakeObstacle(&snake, obstacle, &gameOver);
+
     elapsed = GetTime() - startTime;
 
     minutes= (int)((elapsed) / 60);
     seconds= (int)(elapsed) % 60;
 
+    //GameCheck(&snake, &gameStarted, window, &startTime,
+    //&obstacle.num, &obstacle, field, &center, radius);
+
 }
 
 void DrawGame(){
+
+    DrawTexture(fieldTexure, 0, 0, WHITE);
     // Draw snake
-    for (int i=0; i<length; i++)
-    {
-        DrawRectangleRec(snake[i], WHITE);
-    }
+    DrawSnake(&snake);
 
-    DrawRectangleLines(posX, posY, width, height, BLACK);
-    DrawCircle(centerX, centerY, 10, WHITE);
-
+    //DrawRectangleLines(posX, posY, width, height, BLACK);
+    DrawRectangleLinesEx(field, 2.0f, WHITE);
+    DrawCircle(center.x, center.y, radius, WHITE);
+    // CheckGame
     if(gameOver)
     {
 
         DrawText("Game Over", window/5, window/5, 100, WHITE);
         DrawText("Press R to Restart", window/5, window/3, 50, WHITE);
-        
+
         if(IsKeyPressed(KEY_R)){
             startTime=GetTime();
             InitGame();
         }
     }
 
-    if(!gameStarted){
-        DrawText("Press Enter to start", window/4, window/5, 30, WHITE);
+    if(!gameStarted)
+    GameCheck(&snake, &gameStarted, window, &startTime,
+    &obstacle.num, &obstacle, field, &center, radius);
 
-        if(IsKeyPressed(KEY_ENTER)){
-            startTime=GetTime();
-            gameStarted=true;
-        }
+    /*if(!gameStarted)
+    {
+        init=1;
+        GameCheck(&snake, &gameStarted, window, &startTime, &obstacle.num);
     }
+    else if(init)
+    {
+        init=0;
+        InitObstacles(&obstacle, field, snake.size);
+    }*/
     DrawText(TextFormat("Score %d", score), 10, 20, 50, WHITE);
 
     DrawText(TextFormat("Time %02d:%02d",minutes, seconds), 10, 80, 40, WHITE);
 
+    for (int i = 0; i < obstacle.num; i++) {
+        
+        DrawRectangleRec(obstacle.rec[i], RED);
+        
+    }
 }
 
 void CloseGame(){
+    UnloadTexture(fieldTexure);
+    UnloadTexture(snakeHead);
 
 }
