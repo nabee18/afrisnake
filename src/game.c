@@ -17,13 +17,13 @@ static int left;
 static int top, bottom;
 
 // Fruit
+static Texture2D fruit;
 static Vector2 center;
 static float radius;
 
 //====snake
 static Snake snake;
 static int bodyStart;
-static Texture2D snakeHead;
 
 static bool gameOver;
 static bool gameStarted;
@@ -51,12 +51,12 @@ void InitGame(){
     top=100;
     bottom= 20;
     
+    fruit= LoadTexture("assets/textures/fruit.png");
     radius=10.0f;
 
     //=====Snake======//
     InitSnake(&snake, window);
     bodyStart=7;
-    snakeHead= LoadTexture("assets/textures/snake.png");
 
     gameOver=false;
     gameStarted=false;
@@ -117,7 +117,17 @@ void DrawGame(){
 
     //DrawRectangleLines(posX, posY, width, height, BLACK);
     DrawRectangleLinesEx(field, 2.0f, WHITE);
-    DrawCircle(center.x, center.y, radius, WHITE);
+
+    //Fruit
+    float scale=0.02f;
+
+    //=========================================//
+    //=============Snake Diagram===============//
+    //=========================================//
+    //DrawCircle(center.x, center.y, radius, WHITE);
+    DrawTexturePro(fruit, (Rectangle){0, 0, fruit.width, fruit.height},
+                    (Rectangle){center.x, center.y, fruit.width*scale, fruit.height*scale},
+                    (Vector2){fruit.width*scale/2, fruit.height*scale/2}, 10.0f, RAYWHITE);
     // CheckGame
     if(gameOver)
     {
@@ -147,7 +157,7 @@ void DrawGame(){
     }*/
     DrawText(TextFormat("Score %d", score), 10, 20, 50, WHITE);
 
-    DrawText(TextFormat("Time %02d:%02d",minutes, seconds), 10, 80, 40, WHITE);
+    DrawText(TextFormat("Time %02d:%02d",minutes, seconds), 400, 30, 40, WHITE);
 
     for (int i = 0; i < obstacle.num; i++) {
         
@@ -158,6 +168,8 @@ void DrawGame(){
 
 void CloseGame(){
     UnloadTexture(fieldTexure);
-    UnloadTexture(snakeHead);
+    UnloadTexture(snake.snakeHead2);
+    UnloadTexture(snake.snakeHead);
+    UnloadTexture(fruit);
 
 }

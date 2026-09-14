@@ -11,7 +11,7 @@ int main()
     
     InitGame();
 
-    SetTargetFPS(60);
+    SetTargetFPS(50);
     
     srand(time(0));
 
